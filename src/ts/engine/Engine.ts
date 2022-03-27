@@ -15,15 +15,16 @@ export class Engine {
             throw new Error("canvas not found");
         }
 
-        const glContext: WebGLRenderingContext|null = canvas.getContext('webgl'); // ES 2.0
-        if (!glContext) {
-            throw new Error("webgl context not found");
-        }
-        this.renderer = new GLRenderer(glContext);
+        this.renderer = new GLRenderer(canvas);
 
         return new Promise<void>(res => {
+            this.loop();
             res();
         });
+    }
+
+    public onResize() {
+        this.renderer?.onResize();
     }
 
     private loop(): void {
