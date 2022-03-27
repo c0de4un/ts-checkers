@@ -1,0 +1,30 @@
+{
+  "name": "checkers",
+  "version": "1.0.0",
+  "description": "Checkers game written in JavaScript. Stack: WebGL, TypeScript, WebPack",
+  "main": "app.js",
+  "scripts": {
+    "clean": "rm dist/bundle.js",
+    "build-dev": "webpack --mode development",
+    "build-prod": "webpack --mode production"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/c0de4un/ts-checkers.git"
+  },
+  "author": "c0de4un",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/c0de4un/ts-checkers/issues"
+  },
+  "homepage": "https://github.com/c0de4un/ts-checkers#readme",
+  "devDependencies": {
+    "css-loader": "^6.7.1",
+    "style-loader": "^3.3.1",
+    "ts-loader": "^9.2.8",
+    "typescript": "^4.6.3",
+    "url-loader": "^4.1.1",
+    "webpack": "^5.70.0",
+    "webpack-cli": "^4.9.2"
+  }
+}
