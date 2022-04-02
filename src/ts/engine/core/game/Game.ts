@@ -20,7 +20,17 @@ import { System } from "../../ecs/System";
  * @version 1.0
 */
 export class Game extends System {
+    protected static instance: Game|null = null;
+
     constructor() {
         super(ESystems.GAME);
+    }
+
+    /**
+     * Returns Game instance
+     * @return {Game|null}
+    */
+    public static getInstance(): Game|null {
+        return Game.instance;
     }
 }

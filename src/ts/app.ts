@@ -1,4 +1,5 @@
 import { Renderer } from "./engine/webgl/render/Renderer";
+import { CheckersGame } from "./game/CheckersGame";
 
 window.onload = () => {
     console.log('Starting game . . .');
@@ -12,6 +13,7 @@ window.onload = () => {
     Renderer.init(canvas);
 
     // Initialize Game
+    CheckersGame.init();
 
     // Initialize Engine
 

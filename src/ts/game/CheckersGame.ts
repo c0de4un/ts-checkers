@@ -19,4 +19,11 @@ import { Game } from "../engine/core/game/Game";
  * @version 1.0
 */
 export class CheckersGame extends Game {
+    public static init(): CheckersGame {
+        if (!CheckersGame.instance) {
+            CheckersGame.instance = new CheckersGame();
+        }
+
+        return CheckersGame.instance as CheckersGame;
+    }
 }
