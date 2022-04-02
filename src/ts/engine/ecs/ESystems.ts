@@ -12,15 +12,12 @@
  * POSSIBILITY OF SUCH DAMAGE.
 **/
 
-import { ESystems } from "../../../engine/ecs/ESystems";
-import { System } from "../../ecs/System";
-
-/**
- * Game class
- * @version 1.0
-*/
-export class Game extends System {
-    constructor() {
-        super(ESystems.GAME);
-    }
+export enum ESystems {
+    MIN      = 0,
+    GAME     = 1,
+    RENDERER = 2,
+    AUDIO    = 3,
+    ASSETS   = 4,
+    INPUT    = 5,
+    MAX      = 10
 }

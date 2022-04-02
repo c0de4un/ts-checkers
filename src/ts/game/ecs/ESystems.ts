@@ -12,14 +12,12 @@
  * POSSIBILITY OF SUCH DAMAGE.
 **/
 
+import { ESystems } from "../../engine/ecs/ESystems";
+
 /**
  * Systems
  * @version 1.0
 */
-export enum ESystems {
-    GAME     = 1,
-    RENDERER = 2,
-    AUDIO    = 3,
-    ASSETS   = 4,
-    INPUT    = 5
+export enum EGameSystems {
+    MIN = ESystems.MAX
 }

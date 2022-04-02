@@ -12,15 +12,22 @@
  * POSSIBILITY OF SUCH DAMAGE.
 **/
 
-import { ESystems } from "../../../engine/ecs/ESystems";
-import { System } from "../../ecs/System";
-
 /**
- * Game class
+ * Render manager interface
  * @version 1.0
 */
-export class Game extends System {
-    constructor() {
-        super(ESystems.GAME);
-    }
+export interface IRenderer {
+    /**
+     * Set surface color
+     * @param {Number}     r
+     * @param {Number}     g
+     * @param {Number}     b
+     * @param {Number|1.0} a
+    */
+    setSurfaceColor(r: number, g: number, b: number, a: number|1.0): void;
+
+    /**
+     * Clear rendering surface
+    */
+    clearSurface(): void;
 }
