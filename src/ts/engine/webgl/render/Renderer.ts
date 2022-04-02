@@ -67,11 +67,29 @@ export class Renderer extends System implements IRenderer {
         this.canvas.height = window.innerHeight;
     }
 
-    setSurfaceColor(r: number, g: number, b: number, a: number|1.0): void {
+    /**
+     * Draw
+    */
+    public Draw(): void {
+        if (!this.isStarted()) { return; }
+
+        requestAnimationFrame(this.Draw.bind(this));
+
+        // Render Frame
+        this.clearSurface();
+        if (this.isPaused()) { return; }
+    }
+
+    public setSurfaceColor(r: number, g: number, b: number, a: number|1.0): void {
         this.glContext.clearColor(r, g, b, a);
     }
 
-    clearSurface(): void {
+    public clearSurface(): void {
         this.glContext.clear(WebGLRenderingContext.COLOR_BUFFER_BIT);
+    }
+
+    protected onStart(): boolean {
+        requestAnimationFrame(this.Draw.bind(this));
+        return true;
     }
 }
