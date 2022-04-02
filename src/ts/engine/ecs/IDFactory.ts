@@ -41,7 +41,8 @@ export class IDFactory {
 
         output = this.available.pop();
         if (output === undefined) {
-            this.reserved.push(this.reserved.length + 1);
+            output = this.reserved.length + 1;
+            this.reserved.push(output);
         }
 
         if (output === undefined) {
