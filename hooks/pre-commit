@@ -1,0 +1,10 @@
+#!/bin/sh
+
+echo "Executing eslint"
+npm run eslint
+result=$?
+if [ "$result" != 0 ]; then
+ echo "Syntax errors were found"
+ exit 1
+fi
+exit 0

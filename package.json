@@ -5,6 +5,8 @@
   "main": "app.js",
   "scripts": {
     "clean": "rm dist/bundle.js",
+    "eslint": "npx eslint src/ts/**",
+    "eslint:fix": "npx eslint src/ts/** --fix",
     "build-dev": "webpack --mode development",
     "build-prod": "webpack --mode production"
   },
@@ -19,7 +21,9 @@
   },
   "homepage": "https://github.com/c0de4un/ts-checkers#readme",
   "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^5.17.0",
     "css-loader": "^6.7.1",
+    "eslint": "^8.12.0",
     "style-loader": "^3.3.1",
     "ts-loader": "^9.2.8",
     "typescript": "^4.6.3",
