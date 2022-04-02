@@ -12,6 +12,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
 **/
 
+import { Renderer } from "../../webgl/render/Renderer";
 import { Engine } from "./Engine";
 
 /**
@@ -39,6 +40,9 @@ export class StepEngine extends Engine {
     */
     protected onStart(): boolean {
         console.log('StepEngine.onStart');
+
+        this.mainLoop();
+
         return true;
     }
 
@@ -54,5 +58,26 @@ export class StepEngine extends Engine {
     */
     protected onStop(): void {
         console.log('StepEngine.onStop');
+
+        // Stop Renderer
+        const renderer: Renderer|null = Renderer.getInstance();
+        renderer?.Stop();
+    }
+
+    /**
+     * Update thread
+    */
+    private async mainLoop(): Promise<void> {
+        return new Promise<void>(() => {
+            if (!this.isStarted()) {
+                return;
+            }
+
+            if (!this.isPaused()) {
+                // Update Logic
+            }
+
+            requestAnimationFrame(this.mainLoop.bind(this));
+        });
     }
 }

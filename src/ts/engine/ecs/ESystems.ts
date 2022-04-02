@@ -20,5 +20,6 @@ export enum ESystems {
     ASSETS   = 4,
     INPUT    = 5,
     ENGINE   = 6,
+    UPDATER  = 7,
     MAX      = 10
 }

@@ -132,20 +132,20 @@ export class System implements ISystem {
      * @return {Boolean} - "true" on success, "false" if failed
     */
     protected onStart(): boolean {
-        throw new Error("not implemented");
+        return true;
     }
 
     /**
      * Called when System is paused
     */
     protected onPause(): void {
-        throw new Error("not implemented");
+        return;
     }
 
     /**
      * Called when System is stopped
     */
     protected onStop(): void {
-        throw new Error("not implemented");
+        return;
     }
 }
