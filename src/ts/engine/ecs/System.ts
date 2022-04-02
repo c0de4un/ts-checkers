@@ -55,11 +55,32 @@ export class System implements ISystem {
     public async Start(): Promise<boolean> {
         return new Promise<boolean>((resolve, reject) => {
             const lock: SpinLock = new SpinLock(this.mutex);
+
+            // Resume
+            if (this.isPaused()) {
+                let result = false;
+                try {
+                    result = this.onResume();
+
+                    this.state = ESystemStates.RUNNING;
+                } catch(error) {
+                    reject(error);
+                    return;
+                } finally {
+                    lock.unlock();
+                }
+
+                resolve(result);
+                return;
+            }
+
             if (this.isStarted()) {
+                lock.unlock();
                 resolve(true);
                 return;
             }
 
+            // Start
             this.state = ESystemStates.STARTING;
 
             let result = false;
@@ -69,6 +90,7 @@ export class System implements ISystem {
                 this.state = ESystemStates.RUNNING;
             } catch(error) {
                 reject(error);
+                return;
             } finally {
                 lock.unlock();
             }
@@ -132,6 +154,14 @@ export class System implements ISystem {
      * @return {Boolean} - "true" on success, "false" if failed
     */
     protected onStart(): boolean {
+        return true;
+    }
+
+    /**
+     * Called when System is resumed
+     * @return {Boolean} - "true" on sucess
+    */
+    protected onResume(): boolean {
         return true;
     }
 
