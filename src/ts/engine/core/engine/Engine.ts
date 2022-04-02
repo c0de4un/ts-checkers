@@ -12,31 +12,25 @@
  * POSSIBILITY OF SUCH DAMAGE.
 **/
 
-import { Renderer } from "./engine/webgl/render/Renderer";
-import { CheckersGame } from "./game/CheckersGame";
-import { StepEngine } from "./engine/core/engine/StepEngine";
+import { ESystems } from "../../ecs/ESystems";
+import { System } from "../../ecs/System";
 
-window.onload = () => {
-    console.log('Starting game . . .');
+/**
+ * Engine class
+ * @version 1.0
+*/
+export class Engine extends System {
+    protected static instance: Engine|null = null;
 
-    const canvas: HTMLCanvasElement|null = document.getElementById('canvas') as HTMLCanvasElement|null;
-    if (!canvas) {
-        throw new Error("canvas not found");
+    constructor() {
+        super(ESystems.ENGINE);
     }
 
-    // Initialize WebGL Renderer
-    Renderer.init(canvas);
-
-    // Initialize Game
-    CheckersGame.init();
-
-    // Initialize and Start StepEngine
-    StepEngine.init().Start();
-
-    window.onresize = () => {
-        const renderer: Renderer|null = Renderer.getInstance();
-        renderer?.handleResize();
-    };
-
-    console.log('Game is closed');
-};
+    /**
+     * Returns Engine instance
+     * @return {Engine|null}
+    */
+    public static getInstance(): Engine|null {
+        return Engine.instance;
+    }
+}

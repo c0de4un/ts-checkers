@@ -19,5 +19,6 @@ export enum ESystems {
     AUDIO    = 3,
     ASSETS   = 4,
     INPUT    = 5,
+    ENGINE   = 6,
     MAX      = 10
 }
