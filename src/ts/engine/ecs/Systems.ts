@@ -12,50 +12,47 @@
  * POSSIBILITY OF SUCH DAMAGE.
 **/
 
+import { IDFactory } from "./IDFactory";
+
 /**
- * System interface
+ * Systems manager
  * @version 1.0
 */
-export interface ISystem {
+export class Systems {
+    private static instance: Systems|null = null;
+    private ids: IDFactory;
+
+    constructor() {
+        this.ids = new IDFactory();
+    }
+
     /**
-     * Get System Type-ID
-     *
+     * Get Systems
+     * @return {Systems}
+    */
+    public static getInstance(): Systems {
+        if (!Systems.instance) {
+            Systems.instance = new Systems();
+        }
+
+        return Systems.instance;
+    }
+
+    /**
+     * Generate System id
      * @return {Number}
     */
-    getTypeID(): number;
+    public static generateId(): number {
+        const instance: Systems = Systems.getInstance();
+        return instance.ids.get();
+    }
 
     /**
-     * Get System ID
-     *
-     * @return {Number}
+     * Pool id
+     * @param {Number} id
     */
-    getID(): number;
-
-    /**
-     * Is System started
-     * @return {Boolean}
-    */
-    isStarted(): boolean;
-
-    /**
-     * Is system paused
-     * @return {Boolean}
-    */
-    isPaused(): boolean;
-
-    /**
-     * Start or resume system
-     * @return {Boolean}
-    */
-    Start(): Promise<boolean>;
-
-    /**
-     * Pause system
-    */
-    Pause(): Promise<void>;
-
-    /**
-     * Stop system
-    */
-    Stop(): Promise<void>;
+    public static poolId(id: number): void {
+        const instance: Systems = Systems.getInstance();
+        instance.ids.pool(id);
+    }
 }

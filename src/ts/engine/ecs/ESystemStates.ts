@@ -13,49 +13,14 @@
 **/
 
 /**
- * System interface
+ * System states
  * @version 1.0
 */
-export interface ISystem {
-    /**
-     * Get System Type-ID
-     *
-     * @return {Number}
-    */
-    getTypeID(): number;
-
-    /**
-     * Get System ID
-     *
-     * @return {Number}
-    */
-    getID(): number;
-
-    /**
-     * Is System started
-     * @return {Boolean}
-    */
-    isStarted(): boolean;
-
-    /**
-     * Is system paused
-     * @return {Boolean}
-    */
-    isPaused(): boolean;
-
-    /**
-     * Start or resume system
-     * @return {Boolean}
-    */
-    Start(): Promise<boolean>;
-
-    /**
-     * Pause system
-    */
-    Pause(): Promise<void>;
-
-    /**
-     * Stop system
-    */
-    Stop(): Promise<void>;
+export enum ESystemStates {
+    STOPPED  = 1,
+    STARTING = 2,
+    RUNNING  = 3,
+    PAUSING  = 5,
+    PAUSED   = 6,
+    STOPPING = 7
 }
