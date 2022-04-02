@@ -13,6 +13,8 @@
 **/
 
 import { Renderer } from "../../webgl/render/Renderer";
+import { Game } from "../game/Game";
+import { UpdateThread } from "../logic/UpdateThread";
 import { Engine } from "./Engine";
 
 /**
@@ -39,11 +41,29 @@ export class StepEngine extends Engine {
      * @return {Boolean} - "true" on success, "false" if failed
     */
     protected onStart(): boolean {
-        console.log('StepEngine.onStart');
+        // Start/Resume Game
+        const game: Game|null = Game.getInstance();
+        if (!game) {
+            throw new Error("game must be initialized before engine starts !");
+        }
+        game.Start();
 
-        this.mainLoop();
+        // Start/Resume logic loop
+        const updater: UpdateThread|null = UpdateThread.init();
+        updater.Start();
+
+        // Start/Resume Renderer
+        const renderer: Renderer|null = Renderer.getInstance();
+        if (!renderer) {
+            throw new Error("renderer must be initialized before engine starts !");
+        }
+        renderer.Start();
 
         return true;
+    }
+
+    protected onResume(): boolean {
+        return this.onStart();
     }
 
     /**
@@ -51,6 +71,18 @@ export class StepEngine extends Engine {
     */
     protected onPause(): void {
         console.log('StepEngine.onPause');
+
+        // Pause Game
+        const game: Game|null = Game.getInstance();
+        game?.Pause();
+
+        // Pause Updater
+        const updater: UpdateThread|null = UpdateThread.init();
+        updater?.Pause();
+
+        // Pause Renderer
+        const renderer: Renderer|null = Renderer.getInstance();
+        renderer?.Pause();
     }
 
     /**
@@ -59,25 +91,16 @@ export class StepEngine extends Engine {
     protected onStop(): void {
         console.log('StepEngine.onStop');
 
+        // Stop Game
+        const game: Game|null = Game.getInstance();
+        game?.Stop();
+
+        // Stop Updater
+        const updater: UpdateThread|null = UpdateThread.init();
+        updater?.Stop();
+
         // Stop Renderer
         const renderer: Renderer|null = Renderer.getInstance();
         renderer?.Stop();
-    }
-
-    /**
-     * Update thread
-    */
-    private async mainLoop(): Promise<void> {
-        return new Promise<void>(() => {
-            if (!this.isStarted()) {
-                return;
-            }
-
-            if (!this.isPaused()) {
-                // Update Logic
-            }
-
-            requestAnimationFrame(this.mainLoop.bind(this));
-        });
     }
 }
