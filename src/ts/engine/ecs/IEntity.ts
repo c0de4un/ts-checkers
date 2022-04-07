@@ -12,30 +12,36 @@
  * POSSIBILITY OF SUCH DAMAGE.
 **/
 
-import { IVector4f } from "../math/IVector4f";
+import { IComponent } from "./IComponent";
 
 /**
- * Movable interface
+ * Entity interface
  * @version 1.0
 */
-export interface IMovable {
+export interface IEntity {
     /**
-     * Returns current location
-     * @return {IVector4f}
+     * Returns Entity Type-ID
+     * @return {number}
     */
-    getLocation(): IVector4f;
+    getTypeID(): number;
 
     /**
-     * Sets new location
-     * @param {IVector4f} vec
-     * @param {Boolean}   attached - "true" to move attached objects
+     * Returns Entity ID
+     * @return {number}
     */
-    setLocation(vec: IVector4f, attached: boolean): void;
+    getID(): number;
 
     /**
-     * Translate by given offset
-     * @param {IVector4f} vec
-     * @param {Boolean}   attached
+     * Attaches Component
+     *
+     * @param {IComponent} component
     */
-    move(vec: IVector4f, attached: boolean): void;
+    attachComponent(component: IComponent): void;
+
+    /**
+     * Detaches Component
+     *
+     * @param {IComponent} component
+    */
+    detachComponent(component: IComponent): void;
 }

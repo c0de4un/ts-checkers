@@ -20,7 +20,7 @@ import { Vec4f } from "./Vec4f";
  * Allows to switch implementation
  * @version 1.0
 */
-export class Math {
+export class MathAdapter {
     /**
      * Creates new vector
      * @return {IVector4f}

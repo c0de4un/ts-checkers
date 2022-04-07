@@ -12,30 +12,32 @@
  * POSSIBILITY OF SUCH DAMAGE.
 **/
 
+import { IMovable } from "../logic/IMovable";
+import { IGameObject } from "./IGameObject";
 import { IVector4f } from "../math/IVector4f";
+import { MathAdapter } from "../math/MathAdapter";
 
 /**
- * Movable interface
+ * GameObject class
  * @version 1.0
 */
-export interface IMovable {
-    /**
-     * Returns current location
-     * @return {IVector4f}
-    */
-    getLocation(): IVector4f;
+export class GameObject implements IMovable, IGameObject {
 
-    /**
-     * Sets new location
-     * @param {IVector4f} vec
-     * @param {Boolean}   attached - "true" to move attached objects
-    */
-    setLocation(vec: IVector4f, attached: boolean): void;
+    attach(child: IGameObject): boolean { // @TODO: GameObject::attach()
+        return false;
+    }
 
-    /**
-     * Translate by given offset
-     * @param {IVector4f} vec
-     * @param {Boolean}   attached
-    */
-    move(vec: IVector4f, attached: boolean): void;
+    detach(child: IGameObject): void { // @TODO: GameObject::detach()
+        return;
+    }
+
+    getLocation(): IVector4f {// @TODO: @TODO: GameObject::getLocation()
+        return MathAdapter.vec(0, 0, 0, 1);
+    }
+
+    setLocation(vec: IVector4f, attached: boolean): void { // @TODO: GameObject::setLocation()
+    }
+
+    move(vec: IVector4f, attached: boolean): void { // @TODO: GameObject::move()
+    }
 }
