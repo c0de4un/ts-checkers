@@ -15,6 +15,8 @@
 import { IEntity } from "./IEntity";
 import { Entities } from "./Entities";
 import { IComponent } from "./IComponent";
+import { Mutex } from "../core/async/Mutex";
+import { SpinLock } from "../core/async/SpinLock";
 
 /**
  * Entity base class
@@ -24,11 +26,13 @@ export class Entity implements IEntity {
     protected readonly id: number;
     protected readonly typeId: number;
     protected components: IComponent[];
+    protected componentsMutex: Mutex;
 
     constructor(typeId: number) {
         this.typeId = typeId;
         this.id = Entities.generateId(typeId);
         this.components = [];
+        this.componentsMutex = new Mutex();
     }
 
     getTypeID(): number {
@@ -40,13 +44,21 @@ export class Entity implements IEntity {
     }
 
     attachComponent(component: IComponent): void {
+        const lock: SpinLock = new SpinLock(this.componentsMutex);
+
         this.components.push(component);
+
+        lock.unlock();
     }
 
-    detachComponent(component: IComponent): void {// @TODO:
+    detachComponent(component: IComponent): void {
+        const lock: SpinLock = new SpinLock(this.componentsMutex);
+
         this.components = this.components.filter((item) => {
             return item.getID() !== component.getID() && item.getTypeID() !== component.getTypeID();
         });
+
+        lock.unlock();
     }
 
     destroy(): void {
