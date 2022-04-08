@@ -13,6 +13,7 @@
 **/
 
 import { IEntity } from "./IEntity";
+import { Entities } from "./Entities";
 import { IComponent } from "./IComponent";
 
 /**
@@ -26,7 +27,7 @@ export class Entity implements IEntity {
 
     constructor(typeId: number) {
         this.typeId = typeId;
-        this.id = 0;
+        this.id = Entities.generateId(typeId);
         this.components = [];
     }
 
@@ -42,15 +43,13 @@ export class Entity implements IEntity {
         this.components.push(component);
     }
 
-    detachComponent(component: IComponent): void {
-        const newArr: IComponent[] = [];
-        this.components.forEach((item) => {
-            if (item.getID() === component.getID() && item.getTypeID() === component.getTypeID()) {
-                return;
-            }
-
-            newArr.push(item);
+    detachComponent(component: IComponent): void {// @TODO:
+        this.components = this.components.filter((item) => {
+            return item.getID() !== component.getID() && item.getTypeID() !== component.getTypeID();
         });
-        this.components = newArr;
+    }
+
+    destroy(): void {
+        Entities.poolId(this.typeId, this.id);
     }
 }

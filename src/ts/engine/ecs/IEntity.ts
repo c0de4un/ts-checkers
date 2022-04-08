@@ -44,4 +44,9 @@ export interface IEntity {
      * @param {IComponent} component
     */
     detachComponent(component: IComponent): void;
+
+    /**
+     * Destroy Entity instance
+    */
+    destroy(): void;
 }
