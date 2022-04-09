@@ -351,3 +351,5 @@ MigrationBackup/
 /package-lock.json
 /dist/bundle.js
 /-DEV-
+/out/linecounter.json
+/out/linecounter.txt
