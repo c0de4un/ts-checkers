@@ -12,7 +12,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
 **/
 
-import { Mutex } from "../core/async/Mutex";
+import { Mutex } from "async-mutex";
 import { SpinLock } from "../core/async/SpinLock";
 import { IDFactory } from "./IDFactory";
 
@@ -34,57 +34,54 @@ export class Entities {
         Entities.instance = new Entities();
     }
 
-    public static getInstance(): Entities|null {
+    /**
+     * Returns Entities instance
+     * @return {Entities}
+    */
+    public static getInstance(): Entities {
+        if (!Entities.instance) {
+            throw new Error("Entities manager is not initialized !");
+        }
+
         return Entities.instance;
     }
 
     /**
      * Generates Entity id
      * @param {number} typeId
-     * @return {Number}
+     * @return {Promise<number>}
     */
-    public static generateId(typeId: number): number {
-        const instance: Entities|null = Entities.getInstance();
-        if (!instance) {
-            throw new Error("Entities::generateId: is not initialized !");
-        }
-
-        const pool: IDFactory = instance.getIDPool(typeId);
-
-        return pool.get();
+    public static async generateId(typeId: number): Promise<number> {
+        const ids = await Entities.getInstance().getIDPool(typeId);
+        return ids.get();
     }
 
     /**
      * Pool Entity id
      * @param {number} typeId
-     * @param {Number} id
+     * @param {number} id
+     * @return {Promise<void>}
     */
-    public static poolId(typeId: number, id: number): void {
-        const instance: Entities|null = Entities.getInstance();
-        if (!instance) {
-            throw new Error("Entities::poolId: is not initialized !");
-        }
-
-        const pool: IDFactory = instance.getIDPool(typeId);
-        pool.pool(id);
+    public static async poolId(typeId: number, id: number): Promise<void> {
+        const ids = await Entities.getInstance().getIDPool(typeId)
+        return ids.pool(id);
     }
 
     /**
      * Retrieve ID pool
      * @param {number} typeId
-     * @return {IDFactory}
+     * @return {Promise<IDFactory>}
     */
-    private getIDPool(typeId: number): IDFactory {
-        const lock: SpinLock = new SpinLock(this.mutex);
+    private async getIDPool(typeId: number): Promise<IDFactory> {
+        return SpinLock.runExclusive(this.mutex, async () => {
+            let output: IDFactory|undefined = this.ids.get(typeId);
 
-        let output: IDFactory|undefined = this.ids.get(typeId);
-        if (!output) {
-            output = new IDFactory();
-            this.ids.set(typeId, output);
-        }
+            if (!output) {
+                output = new IDFactory();
+                this.ids.set(typeId, output);
+            }
 
-        lock.unlock();
-
-        return output;
+            return output;
+        });
     }
 }

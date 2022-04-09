@@ -18,28 +18,34 @@
 */
 export interface ISystem {
     /**
+     * Async check if object is initialized
+     * @return {Promise<boolean>}
+    */
+    isReady(): Promise<boolean>;
+
+    /**
      * Get System Type-ID
      *
-     * @return {Number}
+     * @return {number}
     */
     getTypeID(): number;
 
     /**
      * Get System ID
      *
-     * @return {Number}
+     * @return {Promise<number>}
     */
-    getID(): number;
+    getID(): Promise<number>;
 
     /**
      * Is System started
-     * @return {Boolean}
+     * @return {boolean}
     */
     isStarted(): boolean;
 
     /**
      * Is system paused
-     * @return {Boolean}
+     * @return {boolean}
     */
     isPaused(): boolean;
 

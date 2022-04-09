@@ -40,9 +40,9 @@ export class Systems {
 
     /**
      * Generate System id
-     * @return {Number}
+     * @return {Promise<number>}
     */
-    public static generateId(): number {
+    public static generateId(): Promise<number> {
         const instance: Systems = Systems.getInstance();
         return instance.ids.get();
     }

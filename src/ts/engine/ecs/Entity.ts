@@ -15,7 +15,7 @@
 import { IEntity } from "./IEntity";
 import { Entities } from "./Entities";
 import { IComponent } from "./IComponent";
-import { Mutex } from "../core/async/Mutex";
+import { Mutex } from "async-mutex";
 import { SpinLock } from "../core/async/SpinLock";
 
 /**
@@ -23,7 +23,7 @@ import { SpinLock } from "../core/async/SpinLock";
  * @version 1.0
 */
 export class Entity implements IEntity {
-    protected readonly id: number;
+    protected readonly id: Promise<number>;
     protected readonly typeId: number;
     protected components: IComponent[];
     protected componentsMutex: Mutex;
@@ -35,33 +35,35 @@ export class Entity implements IEntity {
         this.componentsMutex = new Mutex();
     }
 
+    public async isReady(): Promise<boolean> {
+        return (await this.id) > 0;
+    }
+
     getTypeID(): number {
         return this.typeId;
     }
 
-    getID(): number {
+    getID(): Promise<number> {
         return this.id;
     }
 
-    attachComponent(component: IComponent): void {
-        const lock: SpinLock = new SpinLock(this.componentsMutex);
-
-        this.components.push(component);
-
-        lock.unlock();
-    }
-
-    detachComponent(component: IComponent): void {
-        const lock: SpinLock = new SpinLock(this.componentsMutex);
-
-        this.components = this.components.filter((item) => {
-            return item.getID() !== component.getID() && item.getTypeID() !== component.getTypeID();
+    public async attachComponent(component: IComponent): Promise<void> {
+        await SpinLock.runExclusive(this.componentsMutex, async () => {
+            this.components.push(component);
         });
 
-        lock.unlock();
+        component.onAttached(this);
     }
 
-    destroy(): void {
-        Entities.poolId(this.typeId, this.id);
+    public async detachComponent(component: IComponent): Promise<void> {
+        return SpinLock.runExclusive(this.componentsMutex, async () => {
+            this.components = this.components.filter((item) => {
+                return item.getID() !== component.getID() && item.getTypeID() !== component.getTypeID();
+            });
+        });
+    }
+
+    async destroy(): Promise<void> {
+        return Entities.poolId(this.typeId, await this.id);
     }
 }

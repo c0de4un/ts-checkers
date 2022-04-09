@@ -28,14 +28,14 @@ export interface IMovable {
     /**
      * Sets new location
      * @param {IVector4f} vec
-     * @param {Boolean}   attached - "true" to move attached objects
+     * @param {boolean}   attached - "true" to move attached objects
     */
-    setLocation(vec: IVector4f, attached: boolean): void;
+    setLocation(vec: IVector4f, attached: boolean): Promise<void>;
 
     /**
      * Translate by given offset
      * @param {IVector4f} vec
-     * @param {Boolean}   attached
+     * @param {boolean}   attached
     */
-    move(vec: IVector4f, attached: boolean): void;
+    move(vec: IVector4f, attached: boolean): Promise<void>;
 }

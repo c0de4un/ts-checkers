@@ -88,7 +88,7 @@ export class Renderer extends System implements IRenderer {
         this.glContext.clear(WebGLRenderingContext.COLOR_BUFFER_BIT);
     }
 
-    protected onStart(): boolean {
+    protected async onStart(): Promise<boolean> {
         requestAnimationFrame(this.Draw.bind(this));
         return true;
     }

@@ -12,7 +12,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
 **/
 
-import { Mutex } from "../core/async/Mutex";
+import { Mutex } from 'async-mutex';
 import { SpinLock } from "../core/async/SpinLock";
 
 /**
@@ -32,39 +32,32 @@ export class IDFactory {
 
     /**
      * Get id
-     * @return {Number}
+     * @return {Promise<Number>}
     */
-    public get(): number {
-        let output: number|undefined = 0;
+    public async get(): Promise<number> {
+        return SpinLock.runExclusive(this.mutex, async () => {
+            let id = this.available.pop();
+            if (id === undefined) {
+                id = this.reserved.length + 1;
+                this.reserved.push(id);
+            }
 
-        const lock = new SpinLock(this.mutex);
+            if (id === undefined) {
+                throw new Error("IDFactory::get: bad logic, failed to generate identificator");
+            }
 
-        output = this.available.pop();
-        if (output === undefined) {
-            output = this.reserved.length + 1;
-            this.reserved.push(output);
-        }
-
-        if (output === undefined) {
-            lock.unlock();
-            throw new Error("IDFactory::get: bad logic, failed to generate identificator");
-        }
-
-        lock.unlock();
-
-        return output;
+            return id;
+        });
     }
 
     /**
      * Return id to pool
      * @param {Number} id
      */
-    public pool(id: number): void {
-        const lock = new SpinLock(this.mutex);
-
-        this.available.push(id);
-        this.reserved = this.reserved.filter((item) => {return item !== id;});
-
-        lock.unlock();
+    public async pool(id: number): Promise<void> {
+        return SpinLock.runExclusive(this.mutex, async () => {
+            this.available.push(id);
+            this.reserved = this.reserved.filter((item) => {return item !== id;});
+        });
     }
 }

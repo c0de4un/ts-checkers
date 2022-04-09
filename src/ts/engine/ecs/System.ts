@@ -12,8 +12,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
 **/
 
+import { Mutex } from 'async-mutex';
 import { ISystem } from "./ISystem";
-import { Mutex } from "../core/async/Mutex";
 import { SpinLock } from "../core/async/SpinLock";
 import { ESystemStates } from "./ESystemStates";
 import { Systems } from "./Systems";
@@ -24,7 +24,7 @@ import { Systems } from "./Systems";
 */
 export class System implements ISystem {
     protected readonly typeID: number;
-    protected readonly id: number;
+    protected readonly id: Promise<number>;
 
     protected state: number;
     protected mutex: Mutex;
@@ -36,11 +36,15 @@ export class System implements ISystem {
         this.mutex = new Mutex();
     }
 
+    public async isReady(): Promise<boolean> {
+        return (await this.id) > 0;
+    }
+
     public getTypeID(): number {
         return this.typeID;
     }
 
-    public getID(): number {
+    public async getID(): Promise<number> {
         return this.id;
     }
 
@@ -53,129 +57,88 @@ export class System implements ISystem {
     }
 
     public async Start(): Promise<boolean> {
-        return new Promise<boolean>((resolve, reject) => {
-            const lock: SpinLock = new SpinLock(this.mutex);
-
+        return SpinLock.runExclusive(this.mutex, async () => {
             // Resume
             if (this.isPaused()) {
-                let result = false;
-                try {
-                    result = this.onResume();
-
+                if (await this.onResume()) {
                     this.state = ESystemStates.RUNNING;
-                } catch(error) {
-                    reject(error);
-                    return;
-                } finally {
-                    lock.unlock();
+                    return true;
                 }
 
-                resolve(result);
-                return;
+                return false;
             }
 
             if (this.isStarted()) {
-                lock.unlock();
-                resolve(true);
-                return;
+                return true;
             }
 
-            // Start
             this.state = ESystemStates.STARTING;
+            const result = await this.onStart();
+            this.state = ESystemStates.RUNNING;
 
-            let result = false;
-            try {
-                result = this.onStart();
-
-                this.state = ESystemStates.RUNNING;
-            } catch(error) {
-                reject(error);
-                return;
-            } finally {
-                lock.unlock();
-            }
-
-            resolve(result);
+            return result;
         });
     }
 
     public async Pause(): Promise<void> {
-        return new Promise<void>((resolve, reject) => {
-            const lock: SpinLock = new SpinLock(this.mutex);
-
+        return SpinLock.runExclusive(this.mutex, async () => {
             if (!this.isStarted() || this.isPaused()) {
-                resolve();
                 return;
             }
 
             this.state = ESystemStates.PAUSING;
-
-            try {
-                this.onPause();
-
-                this.state = ESystemStates.PAUSED;
-            } catch(error) {
-                reject(error);
-            } finally {
-                lock.unlock();
-            }
-
-            resolve();
+            this.onPause();
+            this.state = ESystemStates.PAUSED;
         });
     }
 
     public async Stop(): Promise<void> {
-        return new Promise<void>((resolve, reject) => {
-            const lock: SpinLock = new SpinLock(this.mutex);
-
+        return SpinLock.runExclusive(this.mutex, async () => {
             if (!this.isStarted() || this.isPaused()) {
-                resolve();
                 return;
             }
 
             this.state = ESystemStates.PAUSING;
-
-            try {
-                this.onStop();
-
-                this.state = ESystemStates.PAUSED;
-            } catch(error) {
-                reject(error);
-            } finally {
-                lock.unlock();
-            }
-
-            resolve();
+            this.onStop();
+            this.state = ESystemStates.PAUSED;
         });
     }
 
     /**
      * Called when System is starting
-     * @return {Boolean} - "true" on success, "false" if failed
+     * @return {Promise<boolean>} - "true" on success, "false" if failed
     */
-    protected onStart(): boolean {
-        return true;
+    protected async onStart(): Promise<boolean> {
+        return new Promise<boolean>(() => {
+            return true;
+        });
     }
 
     /**
      * Called when System is resumed
-     * @return {Boolean} - "true" on sucess
+     * @return {Promise<boolean>} - "true" on sucess
     */
-    protected onResume(): boolean {
-        return true;
+    protected async onResume(): Promise<boolean> {
+        return new Promise<boolean>(() => {
+            return true;
+        });
     }
 
     /**
      * Called when System is paused
     */
-    protected onPause(): void {
-        return;
+    protected async onPause(): Promise<void> {
+        return new Promise<void>(() => {
+            return;
+        });
     }
 
     /**
      * Called when System is stopped
     */
-    protected onStop(): void {
-        return;
+    protected async onStop(): Promise<void> {
+        return new Promise<void>(() => {
+            return;
+        });
     }
 }

@@ -12,7 +12,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
 **/
 
-import { Mutex } from "../core/async/Mutex";
+import { Mutex } from "async-mutex";
 import { IEvent } from "./IEvent";
 import { SpinLock } from "../core/async/SpinLock";
 import { IDFactory } from "./IDFactory";
@@ -61,13 +61,10 @@ export class Events {
      * @param {IEventListener} listener
      * @return {Number}        listener id
     */
-    public static registerListener(eventType: number, listener: IEventListener): number {
+    public static async registerListener(eventType: number, listener: IEventListener): Promise<number> {
         const instance: Events = Events.getInstance();
-        let listenerId = 0;
 
-        const lock: SpinLock = new SpinLock(instance.listenersMutex);
-
-        try {
+        return SpinLock.runExclusive(instance.listenersMutex, async () => {
             if (!instance.listeners.has(eventType)) {
                 instance.listeners.set(eventType, new Array<IEventListener>());
             }
@@ -75,12 +72,8 @@ export class Events {
             const listeners: Array<IEventListener>|undefined = instance.listeners.get(eventType);
             listeners?.push(listener);
 
-            listenerId = instance.listenersIDs.get();
-        } finally {
-            lock.unlock();
-        }
-
-        return listenerId;
+            return await instance.listenersIDs.get();
+        });
     }
 
     /**
@@ -88,29 +81,25 @@ export class Events {
      * @param {Number}         eventType
      * @param {IEventListener} listener
     */
-    public static unregisterListener(eventType: number, listener: IEventListener): void {
+    public static async unregisterListener(eventType: number, listener: IEventListener): Promise<void> {
         const instance: Events = Events.getInstance();
         const listenerId = listener.getListenerID();
 
-        const lock: SpinLock = new SpinLock(instance.listenersMutex);
-        if (!instance.listeners.has(eventType)) {
-            lock.unlock();
-            return;
-        }
+        SpinLock.runExclusive(instance.listenersMutex, async () => {
+            if (!instance.listeners.has(eventType)) {
+                return;
+            }
 
-        try {
             const listeners: Array<IEventListener>|undefined = instance.listeners.get(eventType);
             listeners?.filter((item) => {return item.getListenerID() !== listenerId;});
-        } finally {
-            lock.unlock();
-        }
+        });
     }
 
     /**
      * Generates Event id
      * @return {Number}
     */
-    public static generateId(): number {
+    public static async generateId(): Promise<number> {
         const instance: Events = Events.getInstance();
         return instance.ids.get();
     }
@@ -119,9 +108,9 @@ export class Events {
      * Pool Event id
      * @param {Number} id
     */
-    public static poolId(id: number): void {
+    public static async poolId(id: number): Promise<void> {
         const instance: Events = Events.getInstance();
-        instance.ids.pool(id);
+        return instance.ids.pool(id);
     }
 
     /**
@@ -130,24 +119,18 @@ export class Events {
      * @return {Promise<boolean>}
     */
     public static async queue(event: IEvent): Promise<boolean> {
-        return new Promise<boolean>((resolve, reject) => {
-            const eventType = event.getTypeID();
-            const instance: Events = Events.getInstance();
-            const lock: SpinLock = new SpinLock(instance.eventsMutex);
+        const instance: Events = Events.getInstance();
+        const eventType = event.getTypeID();
 
-            try {
-                if (!instance.queue.has(eventType)) {
-                    instance.queue.set(eventType, new Array<IEvent>());
-                }
-                const events: Array<IEvent>|undefined = instance.queue.get(eventType);
-                events?.push(event);
-            } catch(error) {
-                reject(error);
-            } finally {
-                lock.unlock();
+        return SpinLock.runExclusive(instance.eventsMutex, async () => {
+            if (!instance.queue.has(eventType)) {
+                instance.queue.set(eventType, new Array<IEvent>());
             }
 
-            resolve(true);
+            const events: Array<IEvent>|undefined = instance.queue.get(eventType);
+            events?.push(event);
+
+            return true;
         });
     }
 
@@ -157,27 +140,18 @@ export class Events {
      * @return {Promise<boolean>}
     */
     public static async send(event: IEvent): Promise<boolean> {
-        return new Promise<boolean>((resolve, reject) => {
-            const instance: Events = Events.getInstance();
+        const instance: Events = Events.getInstance();
 
-            try {
-                instance.onSend(event);
-            } catch(error) {
-                reject(error);
-            }
-
-            resolve(true);
-        });
+        return instance.onSend(event);
     }
 
     /**
      * Send Event
      * @param {IEvent} event
+     * @return {Promise<boolean>}
     */
-    private onSend(event: IEvent): void {
-        const lock: SpinLock = new SpinLock(this.listenersMutex);
-
-        try {
+    private async onSend(event: IEvent): Promise<boolean> {
+        const result = await SpinLock.runExclusive(this.listenersMutex, async () => {
             let listeners: Array<IEventListener>|undefined = this.listeners.get(0);
             const handled = this.notifyListeners(event, listeners);
 
@@ -185,23 +159,19 @@ export class Events {
                 listeners = this.listeners.get(event.getTypeID());
                 this.notifyListeners(event, listeners);
             }
-        } catch(error) {
-            lock.unlock();
-            event.destroy();
 
-            throw error;
-        }
-
-        lock.unlock();
-
+            return true;
+        });
         event.destroy();
+
+        return result;
     }
 
     /**
      * Notify Event listeners
      * @param {IEvent}                          event
      * @param {Array<IEventListener>|undefined} listeners
-     * @return {Boolean}                        "true" to stop search, "false" to let other listeners to handle Event
+     * @return {boolean}                        "true" to stop search, "false" to let other listeners to handle Event
     */
     private notifyListeners(event: IEvent, listeners: Array<IEventListener>|undefined): boolean {
         if (!listeners) {

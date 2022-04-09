@@ -30,5 +30,8 @@
     "url-loader": "^4.1.1",
     "webpack": "^5.70.0",
     "webpack-cli": "^4.9.2"
+  },
+  "dependencies": {
+    "async-mutex": "^0.3.2"
   }
 }

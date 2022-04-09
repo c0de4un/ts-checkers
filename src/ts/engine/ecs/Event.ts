@@ -20,7 +20,7 @@ import { Events } from "./Events";
  * @version 1.0
 */
 export class Event implements IEvent {
-    protected readonly id: number;
+    protected readonly id: Promise<number>;
     protected readonly typeID: number;
     protected handled: boolean;
 
@@ -33,19 +33,23 @@ export class Event implements IEvent {
         this.handled = false;
     }
 
-     isHandled(): boolean {
-         return this.handled;
-     }
+    public async isReady(): Promise<boolean> {
+        return (await this.id) > 0;
+    }
 
-     getTypeID(): number {
-         return this.typeID;
-     }
+    isHandled(): boolean {
+        return this.handled;
+    }
 
-     getID(): number {
-         return this.id;
-     }
+    public getTypeID(): number {
+        return this.typeID;
+    }
 
-     destroy(): void {
-         Events.poolId(this.id);
-     }
+    public async getID(): Promise<number> {
+        return this.id;
+    }
+
+    public async destroy(): Promise<void> {
+    return Events.poolId(await this.id);
+    }
 }

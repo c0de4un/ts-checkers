@@ -38,7 +38,7 @@ export class UpdateThread extends System {
         return UpdateThread.instance;
     }
 
-     protected onStart(): boolean {
+     protected async onStart(): Promise<boolean> {
         this.timerId = setInterval(() => {
             if (this.isPaused()) { return; }
 
@@ -48,7 +48,7 @@ export class UpdateThread extends System {
         return true;
     }
 
-    protected onStop(): void {
+    protected async onStop(): Promise<void> {
         if (!this.timerId) { return; }
 
         clearInterval(this.timerId);

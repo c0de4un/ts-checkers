@@ -40,7 +40,7 @@ export class StepEngine extends Engine {
      * Called when System is starting
      * @return {Boolean} - "true" on success, "false" if failed
     */
-    protected onStart(): boolean {
+    protected async onStart(): Promise<boolean> {
         // Start/Resume Game
         const game: Game|null = Game.getInstance();
         if (!game) {
@@ -62,14 +62,14 @@ export class StepEngine extends Engine {
         return true;
     }
 
-    protected onResume(): boolean {
+    protected async onResume(): Promise<boolean> {
         return this.onStart();
     }
 
     /**
      * Called when System is paused
     */
-    protected onPause(): void {
+    protected async onPause(): Promise<void> {
         console.log('StepEngine.onPause');
 
         // Pause Game
@@ -88,7 +88,7 @@ export class StepEngine extends Engine {
     /**
      * Called when System is stopped
     */
-    protected onStop(): void {
+    protected async onStop(): Promise<void> {
         console.log('StepEngine.onStop');
 
         // Stop Game

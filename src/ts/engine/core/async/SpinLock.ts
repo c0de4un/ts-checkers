@@ -12,38 +12,28 @@
  * POSSIBILITY OF SUCH DAMAGE.
 **/
 
-import { IMutex } from "./IMutex";
-import { ILock } from "./ILock";
+import { Mutex, MutexInterface } from 'async-mutex';
 
-export class SpinLock implements ILock {
-    private static readonly MAX_SPINS = 24;
-    private mutex: IMutex;
+/**
+ * SpinLock implementation
+ * @version 1.0
+*/
+export class SpinLock {
+    private static readonly MAX_SPINS = 48;
 
     /**
-     * @param {IMutex} mutex
+     * Run worker within exclusive lock
+     *
+     * @param {Mutex} mutex
+     * @param {MutexInterface.Worker<T>} callback
+     * @return {Promise<T>}
     */
-    constructor(mutex: IMutex) {
-        this.mutex = mutex;
-    }
-
-    isLocked(): boolean {
-        return this.mutex.isLocked();
-    }
-
-    lock(): void {
+    public static async runExclusive<T>(mutex: Mutex, callback: MutexInterface.Worker<T>): Promise<T> {
         let spins = 0;
-        do {
-            if (this.mutex.try_lock()) {
-                return;
-            }
-
+        while (mutex.isLocked() && spins < SpinLock.MAX_SPINS) {
             spins++;
-        } while (spins < SpinLock.MAX_SPINS);
+        }
 
-        this.mutex.lock();
-    }
-
-    unlock(): void {
-        this.mutex.unlock();
+        return mutex.runExclusive(callback);
     }
 }

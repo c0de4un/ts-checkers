@@ -17,6 +17,13 @@
  * @version 1.0
 */
 export interface IEvent {
+
+    /**
+     * Async check if object is initialized
+     * @return {Promise<boolean>}
+    */
+    isReady(): Promise<boolean>;
+
     /**
      * Check if this event is handled
      * @return {Boolean}
@@ -25,18 +32,18 @@ export interface IEvent {
 
     /**
      * Get Event Type-ID
-     * @return {Number}
+     * @return {number}
     */
     getTypeID(): number;
 
     /**
      * Get Event ID
-     * @return {Number}
+     * @return {Promise<number>}
     */
-    getID(): number;
+    getID(): Promise<number>;
 
     /**
      * Called to release associated with this Event resources
     */
-    destroy(): void;
+    destroy(): Promise<void>;
 }

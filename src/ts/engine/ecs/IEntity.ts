@@ -20,6 +20,12 @@ import { IComponent } from "./IComponent";
 */
 export interface IEntity {
     /**
+     * Async check if object is initialized
+     * @returns {Promise<boolean>}
+    */
+    isReady(): Promise<boolean>;
+
+    /**
      * Returns Entity Type-ID
      * @return {number}
     */
@@ -27,26 +33,26 @@ export interface IEntity {
 
     /**
      * Returns Entity ID
-     * @return {number}
+     * @return {Promise<number>}
     */
-    getID(): number;
+    getID(): Promise<number>;
 
     /**
      * Attaches Component
      *
      * @param {IComponent} component
     */
-    attachComponent(component: IComponent): void;
+    attachComponent(component: IComponent): Promise<void>;
 
     /**
      * Detaches Component
      *
      * @param {IComponent} component
     */
-    detachComponent(component: IComponent): void;
+    detachComponent(component: IComponent): Promise<void>;
 
     /**
      * Destroy Entity instance
     */
-    destroy(): void;
+    destroy(): Promise<void>;
 }
